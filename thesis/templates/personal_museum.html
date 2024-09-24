@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Your Personal Museum{% endblock %}
+
+{% block content %}
+    <h1>Welcome to Your Personal Museum, {{ name }}!</h1>
+    
+    <div class="personal-info">
+        <h2>About You</h2>
+        <p>Age: {{ age }}</p>
+        <p>Gender: {{ gender }}</p>
+        {% if user_image %}
+        <img src="{{ user_image }}" alt="Your Image" class="user-image">
+        {% endif %}
+    </div>
+
+    <div class="art-preferences">
+        <h2>Your Art Preferences</h2>
+        <h3>Favorite Artists:</h3>
+        <ul>
+            {% for artist in favorite_artists %}
+            <li>{{ artist }}</li>
+            {% endfor %}
+        </ul>
+        <p>Preferred Art Style: {{ art_style }}</p>
+    </div>
+
+    <div class="interests">
+        <h2>Your Interests</h2>
+        <ul>
+            {% for interest in interests %}
+            <li>{{ interest }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="story">
+        <h2>Your Story</h2>
+        <p>{{ story }}</p>
+    </div>
+    {% endblock %}

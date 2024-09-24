@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Animated Artwork{% endblock %}
+
+{% block content %}
+    <h1>Animated Artwork</h1>
+    
+    <div class="card">
+        <h2>Uploaded Artwork Local</h2>
+        <img src="{{ url_for('serve_image', filename=filename) }}" alt="Uploaded Artwork" class="artwork-image">
+    </div>
+
+    <div class="card">
+        <h2>Uploaded Artwork AWS</h2>
+        <img src="{{ image_uri }}" alt="Uploaded Artwork" class="artwork-image">
+    </div>
+
+    <div class="card">
+        <h2>AI Analysis</h2>
+        <p>{{ labels }}</p>
+        <p>AI believes the artist to be: {{ artist }}</p>
+        <p>AI believes the painting to be: {{ artwork }}</p>
+        <form action="{{ url_for('create_digital_art') }}" method="post">
+            <input type="hidden" name="labels" value="{{ labels }}">
+            <input type="hidden" name="artist" value="{{ artist }}">
+            <input type="hidden" name="artwork" value="{{ artwork }}">
+            <input type="hidden" name="art_id" value="{{ art_id }}">
+            <button type="submit" class="btn btn-primary">Create Digital Art</button>
+        </form>
+
+        <br>
+
+        <h1>Generate Art</h1>
+        <form action="{{ url_for('create_user_digital_art') }}" method="post">
+            <input type="hidden" name="labels" value="{{ labels }}">
+            <input type="hidden" name="artist" value="{{ artist }}">
+            <input type="hidden" name="artwork" value="{{ artwork }}">
+            <input type="hidden" name="art_id" value="{{ art_id }}">
+            <label for="user_input">Describe what you want to see:</label>
+            <input type="text" id="user_input" name="user_input" required><br>
+            <label for="palette">Palette (optional):</label>
+            <select id="palette" name="palette">
+            <option value="">Random</option>
+            <option value="vibrant">Vibrant</option>
+            <option value="pastel">Pastel</option>
+            </select><br>
+            <input type="submit" value="Generate your Art">
+        </form>
+        <a href="javascript:history.back()">Back to Entry</a>
+    </div>
+    
+    {% if audio_file %}
+    <div class="card">
+        <h2>Listen to a description of the art</h2>
+        <audio controls>
+            <source src="{{ url_for('audio', filename=audio_file) }}" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+    {% endif %}
+    
+    <div id="video-section" class="card">
+        {% if video_file %}
+        <div id="video-player">
+            <h2>View the art talking</h2>
+            <video width="640" height="480" controls>
+                <source id="video-source" src="{{ url_for('video', filename=video_file) }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        {% else %}
+        <div id="video-loader">
+            Generating video... Please wait.
+        </div>
+        <div id="video-player" style="display:none;">
+            <h2>View the art talking</h2>
+            <video width="640" height="480" controls>
+                <source id="video-source" src="" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        {% endif %}
+    </div>
+
+    <div id="video-talk-section" class="card">
+        <h2>Ask a question to the {{ artwork }} by {{ artist }}</h2>
+        <form action="{{ url_for('talk_to_your_art') }}" method="post">
+            <select name="user_input" id="user_input">
+                <option value="">Select a question</option>
+                {% for question in questions %}
+                    <option value="{{ question.Question }}">{{ question.Question }}</option>
+                {% endfor %}
+            </select>
+            
+            <input type="hidden" name="labels" value="{{ labels }}">
+            <input type="hidden" name="artist" value="{{ artist }}">
+            <input type="hidden" name="artwork" value="{{ artwork }}">
+            <input type="hidden" name="description" value="{{ description }}">
+            <input type="hidden" name="image_uri" value="{{ image_uri }}">
+            <input type="hidden" name="gender" value="{{ gender }}">
+            <input type="hidden" name="isportrait" value="{{ isportrait }}">
+            <input type="hidden" name="art_id" value="{{ art_id }}">
+            <button type="submit" class="btn btn-primary">Ask the question</button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        let videoGenerated = false;
+
+        function checkAllLoaded() {
+            if (videoGenerated) {
+                $('#global-preloader').fadeOut();
+                $('#content').fadeIn();
+            }
+        }
+
+        function checkAnimationStatus() {
+            $.ajax({
+                url: '/animation_status',
+                method: 'GET',
+                success: function(response) {
+                    if (response.complete) {
+                        $('#video-loader').hide();
+                        $('#video-source').attr('src', "/video/" + response.video_file);
+                        $('#video-player').show();
+                        $('video')[0].load();
+                        videoGenerated = true;
+                        checkAllLoaded();
+                    } else {
+                        setTimeout(checkAnimationStatus, 2000);
+                    }
+                },
+                error: function() {
+                    console.error('Error checking animation status');
+                    setTimeout(checkAnimationStatus, 5000);
+                }
+            });
+        }
+
+        
+
+        $('form').on('submit', function() {
+            $('#global-preloader').fadeIn();
+            $('#content').fadeOut();
+        });
+
+        {% if video_file %}
+            $('#video-loader').hide();
+            $('#video-source').attr('src', "/video/{{ video_file }}");
+            $('#video-player').show();
+            $('video')[0].load();
+            videoGenerated = true;
+            checkAllLoaded();
+        {% else %}
+            checkAnimationStatus();
+        {% endif %}
+    });
+</script>
+{% endblock %}
+

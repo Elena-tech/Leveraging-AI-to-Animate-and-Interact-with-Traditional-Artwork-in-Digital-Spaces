@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Your Personal Museum{% endblock %}
+
+{% block content %}
+        <h1>Talking to {{ artwork }}</h1>
+        
+        {% if question %}
+        <div class="art-container">
+            <div class="card">
+                <h2>Your Question</h2>
+                <p>{{ question }}</p>
+                <h2>Our Answer</h2>
+                <p>{{ answer }}</p>
+                <a href="javascript:history.back()">Back to Art</a>
+            </div>
+        </div>    
+        {% endif %}
+
+        
+        <div class="art-container">
+            
+            <div id="video-section" class="card">
+                <div id="video-loader">
+                    <p>Generating video... Please wait.</p>
+                </div>
+                <div id="video-player" style="display:none;">
+                    <h2>View the art answering</h2>
+                    <video width="640" height="480" controls>
+                        <source id="video-source" src="" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            </div>
+        </div>
+        <div class="art-container">
+            <div id="video-talk-section" class="card">
+                <h2>Ask another question to the {{ artwork }}</h2>
+                <form action="{{ url_for('talk_to_your_art') }}" method="post">
+                    <label for="user_input">Your question:</label>
+                    <input type="text" id="user_input" name="user_input" required><br>
+                    <input type="hidden" name="labels" value="{{ labels }}">
+                    <input type="hidden" name="artist" value="{{ artist }}">
+                    <input type="hidden" name="artwork" value="{{ artwork }}">
+                    <input type="hidden" name="description" value="{{ description }}">
+                    <input type="hidden" name="image_uri" value="{{ image_uri }}">
+                    <input type="hidden" name="gender" value="{{ gender }}">
+                    <input type="hidden" name="isportrait" value="{{ isportrait }}">
+                    <input type="hidden" name="art_id" value="{{ art_id }}">
+                    <button type="submit" class="btn btn-primary">Ask another question</button>
+                </form>
+                <br/>
+                <h2>Conversation History</h2>
+                <ul>
+                {% for q in all_questions %}
+                    <li>
+                        <strong>Q: {{ q.question }}</strong><br>
+                        A: {{ q.answer or 'Not answered yet' }}
+                    </li>
+                {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+
+    {% block scripts %}
+    <script>
+        $(document).ready(function() {
+            let videoGenerated = false;
+
+            function checkAllLoaded() {
+                if (videoGenerated) {
+                    $('#global-preloader').fadeOut();
+                    $('#content').fadeIn();
+                }
+            }
+
+            function checkAnimationStatus() {
+                $.ajax({
+                    url: '/animation_status',
+                    method: 'GET',
+                    success: function(response) {
+                        if (response.complete) {
+                            $('#video-loader').hide();
+                            $('#video-source').attr('src', "{{ url_for('video', filename='') }}" + response.video_file);
+                            $('#video-player').show();
+                            $('video')[0].load();
+                            videoGenerated = true;
+                            checkAllLoaded();
+                        } else {
+                            setTimeout(checkAnimationStatus, 2000);
+                        }
+                    },
+                    error: function() {
+                        console.error('Error checking animation status');
+                        setTimeout(checkAnimationStatus, 5000);
+                    }
+                });
+            }
+
+            checkAnimationStatus();
+            $('form').on('submit', function() {
+                $('#global-preloader').fadeIn();
+                $('#content').fadeOut();
+            });
+        });
+    </script>
+    {% endblock %}

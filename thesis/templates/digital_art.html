@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Digital Art Inspired by Original Artwork{% endblock %}
+
+{% block content %}
+        <h1>Digital Art Inspired by Original Artwork</h1>
+        
+        {% if user_input %}
+        <div class="card">
+            <h2>Style</h2>
+            <p>{{ original_description }}</p>
+            <h2>Your input</h2>
+            <p>{{ user_input }}</p>
+            <a href="javascript:history.back()">Back to Art</a>
+        </div>
+
+       {% else %}   
+       <div class="card">
+            <h2>Original Description</h2>
+            <p>{{ original_description }}</p>
+            <a href="javascript:history.back()">Back to Art</a>
+        </div>
+        {% endif %}
+
+        <h2>Generated Digital Art</h2>
+        <div class="art-container">
+            {% for art_file in digital_art_files %}
+                <div class="art-item card">
+                    <img src="{{ art_file[1] }}" alt="Digital Art">
+                    <p>Saved as: {{ art_file[0] }}</p>
+                    <h3>Prompt:</h3>
+                    <pre>{{ prompts[loop.index0] }}</pre>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endblock %}
+
+    {% block scripts %}
+  
+    <script>
+        $(document).ready(function() {
+            $('#global-preloader').fadeOut();
+            $('#content').fadeIn();
+        });
+    </script>
+
+    {% endblock %}

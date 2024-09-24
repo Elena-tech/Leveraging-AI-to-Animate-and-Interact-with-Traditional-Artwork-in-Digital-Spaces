@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="profile-container">
+    <h2>Profile</h2>
+
+    <div class="profile-section">
+        <h3>User Details</h3>
+        <p><strong>Username:</strong> {{ user.username }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+    </div>
+
+    <div class="profile-section">
+        <h3>Uploaded Files</h3>
+        {% if files %}
+            <div class="file-list">
+            {% for file in files %}
+                <div class="file-item">
+                    <div class="file-thumbnail">
+                        <img src="{{ file.aws_url }}" alt="{{ file.filename }}" class="thumbnail">
+                    </div>
+                    <div class="file-details">
+                        <h4><a href="{{ file.aws_url }}" target="_blank">{{ file.filename }}</a></h4>
+                        <p><strong>Uploaded on:</strong> {{ file.upload_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+        {% else %}
+            <p>No files uploaded yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="profile-section">
+        <h3>Analyzed Art</h3>
+        {% if art_details %}
+            {% for detail in art_details %}
+                <div class="art-item">
+                    <h4>"{{ detail.art.art_name }}" by {{ detail.art.painter_name }}</h4>
+                    <p>Analyzed on: {{ detail.art.upload_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                    <p>Is portrait: {{ 'Yes' if detail.art.is_portrait else 'No' }}</p>
+                    {% if detail.art.gender %}
+                        <p>Gender: {{ detail.art.gender }}</p>
+                    {% endif %}
+                    
+                    <h5>Art Content:</h5>
+                    {% for content in detail.content %}
+                        <p>{{ content.content_type }}: 
+                            {% if content.content_type in ['audio', 'video'] %}
+                                <a href="{{ content.content_url }}" target="_blank">View/Listen</a>
+                            {% else %}
+                                {{ content.content_url }}
+                            {% endif %}
+                        </p>
+                    {% endfor %}
+                    
+                    <h5>Art Text:</h5>
+                    {% for text in detail.text %}
+                        <p>{{ text.content_type }}: {{ text.content }}</p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No art analyzed yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="profile-section">
+        <h3>Created Art</h3>
+        {% if created_art %}
+            <div class="created-art-list">
+            {% for art in created_art %}
+                <div class="created-art-item">
+                    <div class="art-thumbnail">
+                        <img src="{{ art.aws_url }}" alt="{{ art.filename }}" class="thumbnail">
+                    </div>
+                    <div class="art-details">
+                        <h4>{{ art.filename }}</h4>
+                        <p><strong>Created on:</strong> {{ art.upload_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                        <p><strong>Prompt:</strong> {{ art.prompt }}</p>
+                        {% if art.user_input %}
+                            <p><strong>User Input:</strong> {{ art.user_input }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+        {% else %}
+            <p>No art created yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#global-preloader').fadeOut();
+        $('#content').fadeIn();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Animated Artwork{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/functions.js') }}"></script>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    {% block navbar %}
+    <div class="navbar">
+        <a href="{{ url_for('upload_file') }}">Home</a>
+        <div class="navbar-right">
+            {% if current_user.is_authenticated %}
+                <div class="dropdown">
+                    <button onclick="toggleDropdown()" class="dropbtn">{{ current_user.username }} ▼</button>
+                    <div id="myDropdown" class="dropdown-content">
+                        <a href="{{ url_for('show_profile') }}">Profile</a>
+                        <a href="{{ url_for('logout') }}">Logout</a>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{{ url_for('login') }}">Login</a>
+                <a href="{{ url_for('register') }}">Register</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endblock %}
+    <div id="global-preloader">
+        <div class="spinner"></div>
+    </div>
+    
+    <div id="content" class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

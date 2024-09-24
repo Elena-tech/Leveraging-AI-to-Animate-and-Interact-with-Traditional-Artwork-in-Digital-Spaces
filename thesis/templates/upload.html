@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Art Experience{% endblock %}
+
+
+{% block content %}
+    <h1>Art Experience</h1>
+    <div class="container">
+        <div class="card" onclick="showForm('talkingArtForm')">
+            <h2>Talk to Art</h2>
+            <p>Upload an artwork and have a conversation with it.</p>
+        </div>
+        <div class="card" onclick="showForm('personalMuseumForm')">
+            <h2>Go to Your Own Art Museum</h2>
+            <p>Create a personalized art museum experience.</p>
+        </div>
+    </div>
+
+    <div id="talkingArtForm" class="form-container">
+        <h2>Upload Artwork</h2>
+        <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+            <button type="button" id="takePictureBtn">Take Picture or Choose File</button>
+            <input type="file" name="file" id="artworkFile" accept="image/*" capture="environment" required>
+            <input type="submit" value="Upload">
+        </form>
+    </div>
+
+    <div id="personalMuseumForm" class="form-container">
+        <h2>Create Your Personal Museum</h2>
+        <form method="post" action="{{ url_for('create_personal_museum') }}" enctype="multipart/form-data">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="age">Age:</label>
+            <input type="number" id="age" name="age" required>
+
+            <label for="gender">Gender:</label>
+            <select id="gender" name="gender" required>
+                <option value="">Select...</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="non-binary">Non-binary</option>
+                <option value="other">Other</option>
+                <option value="prefer-not-to-say">Prefer not to say</option>
+            </select>
+
+            <label for="user-image">Upload Your Picture:</label>
+            <input type="file" id="user-image" name="user-image" accept="image/*">
+
+            <label for="favorite-artists">Favorite Artists (select multiple):</label>
+            <select id="favorite-artists" name="favorite-artists[]" multiple required>
+                <option value="van-gogh">Vincent van Gogh</option>
+                <option value="picasso">Pablo Picasso</option>
+                <option value="monet">Claude Monet</option>
+                <option value="da-vinci">Leonardo da Vinci</option>
+                <option value="warhol">Andy Warhol</option>
+                <!-- Add more options as needed -->
+            </select>
+
+            <label for="art-style">Preferred Art Style:</label>
+            <select id="art-style" name="art-style" required>
+                <option value="">Select...</option>
+                <option value="impressionism">Impressionism</option>
+                <option value="cubism">Cubism</option>
+                <option value="surrealism">Surrealism</option>
+                <option value="abstract">Abstract</option>
+                <option value="renaissance">Renaissance</option>
+                <!-- Add more options as needed -->
+            </select>
+
+            <label for="interests">Interests (select multiple):</label>
+            <select id="interests" name="interests[]" multiple required>
+                <option value="nature">Nature</option>
+                <option value="technology">Technology</option>
+                <option value="music">Music</option>
+                <option value="sports">Sports</option>
+                <option value="literature">Literature</option>
+                <option value="history">History</option>
+                <option value="science">Science</option>
+                <!-- Add more options as needed -->
+            </select>
+
+            <label for="story">Your Story (Brief background about yourself):</label>
+            <textarea id="story" name="story" rows="4"></textarea>
+
+            <input type="submit" value="Create My Museum">
+        </form>
+    </div>
+    {% endblock %}
+
+    {% block scripts %}
+    <script>
+        function showForm(formId) {
+            document.querySelectorAll('.form-container').forEach(form => form.style.display = 'none');
+            document.getElementById(formId).style.display = 'block';
+        }
+        
+        window.addEventListener('load', function() {
+            document.getElementById('global-preloader').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+    
+            // Add event listener for the Take Picture button
+            const takePictureBtn = document.getElementById('takePictureBtn');
+            const artworkFileInput = document.getElementById('artworkFile');
+    
+            if (takePictureBtn && artworkFileInput) {
+                takePictureBtn.addEventListener('click', function() {
+                    artworkFileInput.click();
+                });
+    
+                artworkFileInput.addEventListener('change', function(event) {
+                    if (event.target.files && event.target.files[0]) {
+                        const fileName = event.target.files[0].name;
+                        takePictureBtn.textContent = `File selected: ${fileName}`;
+                    }
+                });
+            }
+        });
+    </script>
+    {% endblock %}
